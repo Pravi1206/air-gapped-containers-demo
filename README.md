@@ -1,3 +1,7 @@
+This repository provides artifacts to showcase the Airgapped Containers feature in Docker Desktop.
+
+This feature is designed to regulate network requests originating from Docker containers while allowing distinct connectivity rules for the Docker Desktop UI (Electron app).
+
 # Setting Up the Environment
 
 ## Prerequisites
@@ -111,6 +115,6 @@ The test application attempts to access two external URLs:
   - To ensure successful image pulls from **Docker Hub**, its domains are already allow-listed in the PAC file.
   - The Docker daemon itself runs inside a container within the **Docker Desktop VM**, which enforces PAC rules.
 
-- **Docker Desktop UI **  
+- **Docker Desktop UI**  
   - Network requests originating from **Docker Desktop UI** will **not** follow the `containersProxy` settings in `admin-settings.json`.
   - In order to control these requests, modify `proxy` section in admin-settings accordingly. 
