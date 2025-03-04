@@ -1,70 +1,66 @@
 const http = require('http');
 const https = require('https');
 
-// Function to make an HTTP/HTTPS request
-function fetchUrl(url) {
+function fetchUrl(url, timeout = 5000) {
   return new Promise((resolve, reject) => {
     console.log(`Attempting to fetch: ${url}`);
-    
-    // Determine if we should use http or https module
+
     const client = url.startsWith('https') ? https : http;
-    
     const request = client.get(url, (response) => {
       let data = '';
-      
-      // A chunk of data has been received
+
+      // Collect response data
       response.on('data', (chunk) => {
         data += chunk;
       });
-      
-      // The whole response has been received
+
       response.on('end', () => {
         console.log(`Status code for ${url}: ${response.statusCode}`);
-        resolve({
-          url,
-          statusCode: response.statusCode,
-          headers: response.headers,
-          data: data.substring(0, 200) + (data.length > 200 ? '...' : '') // Limit output size
-        });
+
+        // Reject the promise if the status code is not in the success range (200-299)
+        if (response.statusCode < 200 || response.statusCode >= 300) {
+          reject(new Error(`Request to ${url} failed with status code ${response.statusCode}`));
+        } else {
+          resolve({
+            url,
+            statusCode: response.statusCode,
+            headers: response.headers,
+            data: data.substring(0, 200) + (data.length > 200 ? '...' : '')
+          });
+        }
       });
     });
-    
-    // Handle errors
+
+    // Handle request errors
     request.on('error', (error) => {
       console.error(`Error fetching ${url}: ${error.message}`);
       reject(error);
     });
-    
-    // Set a timeout (5 seconds)
-    request.setTimeout(5000, () => {
-      request.abort();
-      console.error(`Request to ${url} timed out`);
-      reject(new Error('Request timed out'));
-    });
+
+    // Set a timeout
+    const timeoutId = setTimeout(() => {
+      request.destroy();
+      reject(new Error(`Request to ${url} timed out after ${timeout}ms`));
+    }, timeout);
+
+    request.on('close', () => clearTimeout(timeoutId));
   });
 }
 
-// Define the URLs to fetch
-const url1 = 'http://example.com';
-const url2 = 'http://httpbin.org/get';
-
-// Fetch both URLs
-async function fetchBothUrls() {
+async function fetchUrlsSequentially() {
   try {
-    console.log('Starting to fetch URLs...');
-    
-    // Option 1: Fetch sequentially
-    console.log('\n--- Sequential Fetching ---');
-    const result1 = await fetchUrl(url1);
+    console.log('Starting to fetch URLs sequentially...');
+
+    const result1 = await fetchUrl('http://example.com');
     console.log(`Successfully fetched ${result1.url}`);
-    
-    const result2 = await fetchUrl(url2);
+
+    const result2 = await fetchUrl('http://httpbin.org/get'); 
     console.log(`Successfully fetched ${result2.url}`);
-    
+
   } catch (error) {
     console.error('An error occurred:', error.message);
   }
 }
 
 // Run the function
-fetchBothUrls();
+fetchUrlsSequentially();

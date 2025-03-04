@@ -8,5 +8,6 @@ function FindProxyForURL(url, host) {
 	else if (shExpMatch(host, '*.docker.com')) {
 		return "PROXY 127.0.0.1:9090";
 	}
+	// point to non-existing proxy server
     return "PROXY 127.0.0.1:9091";
 }
