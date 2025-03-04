@@ -1,92 +1,116 @@
-# Setting up the environment
+# Setting Up the Environment
 
 ## Prerequisites
 
-Following tools should be available in your system.
-- Python
-- Node
+Ensure the following tools are installed on your system:
+- **Python**
+- **Node.js**
 
-## 1. Start HTTP server for PAC file
+## Steps to Set Up
 
-`python3 -m http.server --bind 127.0.0.1 8081`
+### 1. Start an HTTP Server for the PAC File
+Run the following command to start a simple HTTP server on port `8081`, serving the PAC file:
 
-## 2. Star the proxy server
-
-`node proxyserver/proxy.js`
-
-
-## 3. Configure admin settings for DD
-
-The following section needs to be added to your <b>admin-settings.json</b>. 
-
-```
-  "containersProxy": {
-    "locked": true,
-    "mode": "manual",
-    "http": "",
-    "https": "",
-    "pac":"http://127.0.0.1:8081/proxy.pac",
-    "transparentPorts": "*"
-  }
+```sh
+python3 -m http.server --bind 127.0.0.1 8081
 ```
 
-You could use the admin-settings.json available in this repository if needed. Ensure the contents of this section is copied as it is(you could change the PAC fie path if it runs in a different location).
+### 2. Start the Proxy Server
+Execute the following command to start the proxy server:
 
-## 4. Containerize the test app
-
+```sh
+node proxyserver/proxy.js
 ```
+
+### 3. Configure Admin Settings for Docker Desktop
+Modify your **`admin-settings.json`** file to include the following section:
+
+```json
+"containersProxy": {
+  "locked": true,
+  "mode": "manual",
+  "http": "",
+  "https": "",
+  "pac": "http://127.0.0.1:8081/proxy.pac",
+  "transparentPorts": "*"
+}
+```
+
+> **Note:**  
+> - You can use the `admin-settings.json` provided in this repository.  
+> - Ensure this section is copied as-is, except for updating the PAC file path if it's hosted elsewhere.
+
+### 4. Containerize the Test Application
+Navigate to the `app` directory and build the Docker image:
+
+```sh
 cd app
 docker build -t simple-app .
 ```
 
+---
 
-# Demo 1
+# Demonstrations
 
-The test app reaches out to 2 URLs on the internet. 
-- example.com
-- httpbin.org
+## Demo 1: Proxy Behavior with Allowed and Blocked URLs
 
-The proxy PAC has been configured to only allow example.com. Therefore when we run the app, it should only be able to reach example.com. 
+The test application attempts to access two external URLs:
+- ✅ `example.com` (allowed by the PAC file)
+- ❌ `httpbin.org` (blocked by the PAC file)
 
-1. Start Docker Desktop
-2. Start the test app container
+#### Steps:
+1. Start **Docker Desktop**.
+2. Run the test application container:
 
-   ` docker run simple-app`
+   ```sh
+   docker run simple-app
+   ```
 
-  You should see a similar output as follows.
+3. Expected output:
 
-```
-Starting to fetch URLs...
+   ```
+   Starting to fetch URLs...
+   
+   --- Sequential Fetching ---
+   Attempting to fetch: http://example.com
+   Status code for http://example.com: 200
+   Successfully fetched http://example.com
+   Attempting to fetch: http://httpbin.org/get
+   Request to http://httpbin.org/get timed out
+   An error occurred: Request timed out
+   Error fetching http://httpbin.org/get: socket hang up
+   ```
 
---- Sequential Fetching ---
-Attempting to fetch: http://example.com
-Status code for http://example.com: 200
-Successfully fetched http://example.com
-Attempting to fetch: http://httpbin.org/get
-Request to http://httpbin.org/get timed out
-An error occurred: Request timed out
-Error fetching http://httpbin.org/get: socket hang up
-```
-
-This test ensures the container could only reach example.com which has been allow-listed via the PAC
-
-
-## Demo 2
-
-1. exec into an ubuntu container
-
-    `docker run -it ubuntu`
-
-2. The following should fail as the container is unable to reach the package repository URLs
-
-    `apt-get update` 
+   This confirms that the container is only able to access `example.com` while other requests are blocked.
 
 ---
-### Note
 
-- The docker CLI commands such as which results in network calls(such as `docker pull`) will also obey the PAC rules. Hence the PAC file needs to allow docker domains to successfully pull images from Docker Hub. This has already been allowlisted in the PAC file. 
+## Demo 2: Blocking Network Access for an Ubuntu Container
 
-- The reason for this behaviour is that, the docker daemon also runs within a container within the Docker Desktop VM.
+#### Steps:
+1. Run an interactive Ubuntu container:
 
-- Any network request originated via the Docker Desktop UI, will not go through the PAC file as it does not honour `containersProxy` settings in admin-settings. 
+   ```sh
+   docker run -it ubuntu
+   ```
 
+2. Attempt to update package repositories:
+
+   ```sh
+   apt-get update
+   ```
+
+   This command should fail, as the container cannot reach external package repositories due to the proxy restrictions.
+
+---
+
+# Additional Notes
+
+- **Docker CLI & PAC Rules**  
+  - Any Docker CLI command that requires network access (e.g., `docker pull`) will follow PAC file rules.
+  - To ensure successful image pulls from **Docker Hub**, its domains are already allow-listed in the PAC file.
+  - The Docker daemon itself runs inside a container within the **Docker Desktop VM**, which enforces PAC rules.
+
+- **Docker Desktop UI **  
+  - Network requests originating from **Docker Desktop UI** will **not** follow the `containersProxy` settings in `admin-settings.json`.
+  - In order to control these requests, modify `proxy` section in admin-settings accordingly. 
