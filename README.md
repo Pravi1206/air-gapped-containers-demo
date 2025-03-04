@@ -108,9 +108,8 @@ The test application attempts to access two external URLs:
 # Additional Notes
 
 - **Docker CLI & PAC Rules**  
-  - Any Docker CLI command that requires network access (e.g., `docker pull`) will follow PAC file rules.
+  - Since Docker daemon runs within the same VM as the containers, the same rules apply to docker commands(e.g `docker pull` etc). 
   - To ensure successful image pulls from **Docker Hub**, its domains are already allow-listed in the PAC file.
-  - The Docker daemon itself runs inside a containerd container within the **Docker Desktop VM**, which enforces PAC rules.
 
 - **Docker Desktop UI**  
   - Network requests originating from **Docker Desktop UI** will **not** follow the `containersProxy` settings in `admin-settings.json`.
