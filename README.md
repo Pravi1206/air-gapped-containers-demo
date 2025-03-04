@@ -73,13 +73,13 @@ The test application attempts to access two external URLs:
 3. Expected output:
 
    ```
-Starting to fetch URLs sequentially...
-Attempting to fetch: http://example.com
-Status code for http://example.com: 200
-Successfully fetched http://example.com
-Attempting to fetch: http://httpbin.org/get
-Status code for http://httpbin.org/get: 500
-An error occurred: Request to http://httpbin.org/get failed with status code 500
+    Starting to fetch URLs sequentially...
+    Attempting to fetch: http://example.com
+    Status code for http://example.com: 200
+    Successfully fetched http://example.com
+    Attempting to fetch: http://httpbin.org/get
+    Status code for http://httpbin.org/get: 500
+    An error occurred: Request to http://httpbin.org/get failed with status code 500
    ```
 
    This confirms that the container is only able to access `example.com` while other requests are blocked.
