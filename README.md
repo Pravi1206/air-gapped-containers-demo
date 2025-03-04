@@ -73,16 +73,13 @@ The test application attempts to access two external URLs:
 3. Expected output:
 
    ```
-   Starting to fetch URLs...
-   
-   --- Sequential Fetching ---
-   Attempting to fetch: http://example.com
-   Status code for http://example.com: 200
-   Successfully fetched http://example.com
-   Attempting to fetch: http://httpbin.org/get
-   Request to http://httpbin.org/get timed out
-   An error occurred: Request timed out
-   Error fetching http://httpbin.org/get: socket hang up
+Starting to fetch URLs sequentially...
+Attempting to fetch: http://example.com
+Status code for http://example.com: 200
+Successfully fetched http://example.com
+Attempting to fetch: http://httpbin.org/get
+Status code for http://httpbin.org/get: 500
+An error occurred: Request to http://httpbin.org/get failed with status code 500
    ```
 
    This confirms that the container is only able to access `example.com` while other requests are blocked.
@@ -113,7 +110,7 @@ The test application attempts to access two external URLs:
 - **Docker CLI & PAC Rules**  
   - Any Docker CLI command that requires network access (e.g., `docker pull`) will follow PAC file rules.
   - To ensure successful image pulls from **Docker Hub**, its domains are already allow-listed in the PAC file.
-  - The Docker daemon itself runs inside a container within the **Docker Desktop VM**, which enforces PAC rules.
+  - The Docker daemon itself runs inside a containerd container within the **Docker Desktop VM**, which enforces PAC rules.
 
 - **Docker Desktop UI**  
   - Network requests originating from **Docker Desktop UI** will **not** follow the `containersProxy` settings in `admin-settings.json`.
