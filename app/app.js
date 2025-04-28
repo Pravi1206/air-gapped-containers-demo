@@ -1,9 +1,14 @@
 const http = require('http');
 const https = require('https');
+const moment = require('moment-timezone');
+
+const getTimestamp = (...args) => {
+  return moment().tz('Europe/Berlin').format('YYYY-MM-DD HH:mm:ss')
+}
 
 function fetchUrl(url, timeout = 5000) {
   return new Promise((resolve, reject) => {
-    console.log(`Attempting to fetch: ${url}`);
+    console.log(`[${getTimestamp()}] Attempting to fetch: ${url}`);
 
     const client = url.startsWith('https') ? https : http;
     const request = client.get(url, (response) => {
@@ -15,7 +20,7 @@ function fetchUrl(url, timeout = 5000) {
       });
 
       response.on('end', () => {
-        console.log(`Status code for ${url}: ${response.statusCode}`);
+        console.log(`[${getTimestamp()}] Status code for ${url}: ${response.statusCode}`);
 
         // Reject the promise if the status code is not in the success range (200-299)
         if (response.statusCode < 200 || response.statusCode >= 300) {
@@ -49,13 +54,13 @@ function fetchUrl(url, timeout = 5000) {
 
 async function fetchUrlsSequentially() {
   try {
-    console.log('Starting to fetch URLs sequentially...');
+    console.log(`[${getTimestamp()}] Starting to fetch URLs sequentially...`);
 
     const result1 = await fetchUrl('http://example.com');
-    console.log(`Successfully fetched ${result1.url}`);
+    console.log(`[${getTimestamp()}] Successfully fetched ${result1.url}`);
 
     const result2 = await fetchUrl('http://httpbin.org/get'); 
-    console.log(`Successfully fetched ${result2.url}`);
+    console.log(`[${getTimestamp()}] Successfully fetched ${result2.url}`);
 
   } catch (error) {
     console.error('An error occurred:', error.message);

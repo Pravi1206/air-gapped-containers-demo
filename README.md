@@ -1,32 +1,83 @@
-This repository provides artifacts to showcase the Airgapped Containers feature in Docker Desktop.
+# Airgapped containers
+
+This repository provides artifacts to showcase the Airgapped Containers feature in Docker Desktop. The architecture consists of the following components:
+
+- Server (on Port 8081): This server provides a ``proxy.pac`` file that defines proxy settings.
+- Proxy Server (on Port 9090): The proxy server is referenced by the ``proxy.pac`` file.
+- Air-Gapped Container: The container, running an ``app.js`` which is configured to use the ``proxy.pac`` settings
 
 This feature is designed to regulate network requests originating from Docker containers while allowing distinct connectivity rules for the Docker Desktop UI (Electron app).
+
+```plaintext
++-------------------+                +---------------------------+
+| Server (Port 8081)|    <----->     |  Proxy Server (Port 9090) |
+| (proxy.pac file)  |                |  (Referenced by proxy.pac)|
++-------------------+                +---------------------------+
+         |                                      
+         |                                      
+         v                                      
++-------------------+                    
+| Docker Container  |                    
+| with app.js       |  <-- Uses proxy.pac
+| (air-gapped)      | 
++-------------------+ 
+```
 
 # Setting Up the Environment
 
 ## Prerequisites
 
 Ensure the following tools are installed on your system:
+
 - **Python**
 - **Node.js**
+- **Docker Desktop** v.4.31 or higher
 
 ## Steps to Set Up
 
 ### 1. Start an HTTP Server for the PAC File
-Run the following command to start a simple HTTP server on port `8081`, serving the PAC file:
+
+Navigate into ``proxyserver-pac`` and run the following command to start a simple HTTP server on port `8081`, serving the PAC file:
 
 ```sh
-python3 -m http.server --bind 127.0.0.1 8081
+python3 server.py
+```
+
+This will start the server with following output
+
+```sh
+Server running on http://127.0.0.1:8081
 ```
 
 ### 2. Start the Proxy Server
+
+Navigate into `proxyserver` and install the dependencies
+
+```sh
+npm i
+```
+
 Execute the following command to start the proxy server:
 
 ```sh
-node proxyserver/proxy.js
+npm start
+```
+> NOTE: this will log something like *Proxy server running at http://localhost:9090*
+
+In case you want to test the server, you can take usage of the provided Python test implementation under ``proxyserver/test``. Install the dependencies and make an example request.
+
+```sh
+python3 -m pip install -r requirements.txt
+```
+
+Make an example request
+
+```sh
+python3 proxyserver/test/requestProxy.py http://google.com
 ```
 
 ### 3. Configure Admin Settings for Docker Desktop
+
 Modify your **`admin-settings.json`** file to include the following section:
 
 ```json
@@ -67,7 +118,7 @@ The test application attempts to access two external URLs:
 2. Run the test application container:
 
    ```sh
-   docker run simple-app
+   docker run --rm simple-app
    ```
 
 3. Expected output:

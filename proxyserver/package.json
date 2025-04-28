@@ -1,0 +1,15 @@
+{
+    "name": "proxy-server",
+    "version": "1.0.0",
+    "description": "A simple proxy server with dotenv integration",
+    "main": "proxy.js",
+    "scripts": {
+        "start": "node -r dotenv/config proxy.js"
+    },
+    "dependencies": {
+        "dotenv": "^10.0.0",
+        "moment-timezone": "^0.5.48"
+    },
+    "author": "",
+    "license": "ISC"
+}
