@@ -23,17 +23,13 @@ This feature is designed to regulate network requests originating from Docker co
 +-------------------+ 
 ```
 
-# Setting Up the Environment
-
-## Prerequisites
-
 Ensure the following tools are installed on your system:
 
 - **Python**
 - **Node.js**
 - **Docker Desktop** v.4.31 or higher
 
-## Steps to Set Up
+# Steps to Set Up
 
 ### 1. Start an HTTP Server for the PAC File
 
